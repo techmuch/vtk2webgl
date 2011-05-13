@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>VTK Unstructured Grid with PhiloGL</title>
+        <h1>Jan Palach</h1>
+
+        <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+        <script type="text/javascript" src="static/js/PhiloGL.js"></script>
+
+        <script type=text/javascript>
+            $SCRIPT_ROOT = "";
+        </script>
+
+        <script id="shader-fs" type="x-shader/x-fragment">
+          #ifdef GL_ES
+          precision highp float;
+          #endif
+
+          void main(void) {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+          }
+        </script>
+
+        <script id="shader-vs" type="x-shader/x-vertex">
+          attribute vec3 aVertexPosition;
+
+          uniform mat4 uMVMatrix;
+          uniform mat4 uPMatrix;
+
+          void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+          }
+        </script>
+
+    </head>
+
+    <script type="text/javascript">
+        function webGLStart() {
+              //Load models
+              var pyramid = new PhiloGL.O3D.Model({indices: [0, 1, 3, 1, 4, 3, 1, 2, 4, 2, 5, 4, 3, 4, 6, 4, 7, 6], vertices: [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [2.0, 1.0, 0.0], [0.0, 2.0, 0.0], [1.0, 2.0, 0.0]]});
+//              var pyramid = new PhiloGL.O3D.Model({"indices": [0, 1, 3, 1, 4, 3, 1, 2, 4, 2, 5, 4, 3, 4, 6, 4, 7, 6], "vertices": [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [2.0, 1.0, 0.0], [0.0, 2.0, 0.0], [1.0, 2.0, 0.0]]});
+
+        PhiloGL('canvas01', {
+            program: {
+              from: 'ids',
+              vs: 'shader-vs',
+              fs: 'shader-fs'
+            },
+
+            onError: function() {
+              alert("An error ocurred while loading the application");
+            },
+
+            onLoad: function(app) {
+              var gl = app.gl,
+                  canvas = app.canvas,
+                  program = app.program,
+                  camera = app.camera,
+                  view = new PhiloGL.Mat4,
+                  rPyramid = 0;
+
+              gl.viewport(0, 0, canvas.width, canvas.height);
+              gl.clearColor(0, 0, 0, 1);
+              gl.clearDepth(1);
+              gl.enable(gl.DEPTH_TEST);
+              gl.depthFunc(gl.LEQUAL);
+
+              camera.modelView.id();
+
+              function setupElement(elem) {
+                //update element matrix
+                elem.update();
+                //get new view matrix out of element and camera matrices
+                view.mulMat42(camera.modelView, elem.matrix);
+                //set buffers with element data
+                program.setBuffers({
+                  'aVertexPosition': {
+                    value: elem.toFloat32Array('vertices'),
+                    size: 3
+                  },
+                  'aVertexColor': {
+                    value: elem.toFloat32Array('colors'),
+                    size: 4
+                  }
+                });
+                //set uniforms
+                program.setUniform('uMVMatrix', view);
+                program.setUniform('uPMatrix', camera.projection);
+              }
+
+              function animate() {
+                rPyramid += 0.01;
+              }
+
+              function tick() {
+                drawScene();
+                animate();
+              }
+
+              function drawScene() {
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                //Draw Pyramid
+                pyramid.position.set(-1.5, 0, -8);
+                pyramid.rotation.set(0, rPyramid, 0);
+                setupElement(pyramid);
+
+                program.setBuffer('indices', {
+                  value: pyramid.toUint16Array('indices'),
+                  bufferType: gl.ELEMENT_ARRAY_BUFFER,
+                  size: 1
+                });
+
+                gl.drawElements(gl.TRIANGLES, pyramid.indices.length, gl.UNSIGNED_SHORT, 0);
+              }
+
+              setInterval(tick, 1000/60);
+            }
+          });
+        }
+    </script>
+
+    <body onload="webGLStart();">
+        <canvas id="canvas01" width="900" height="500"></canvas>
+    </body>
+</html>
