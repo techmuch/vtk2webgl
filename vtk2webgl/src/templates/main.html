@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<div id="error_msg">
+		{% if error %}
+			{{ error }}
+		{% endif %}
+	</div>
+
+	<div id="model_view" class="divLogin">
+		<form id="form_model_select" name="form_model_select" action={{ url_for("expose_model") }} method="post">
+			<input type="submit" value="Log in"/>
+		</form>
+		
+		<a href={{ url_for("submit_model") }}>register model</a>
+	</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

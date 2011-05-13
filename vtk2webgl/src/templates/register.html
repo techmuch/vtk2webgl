@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<div id="error_msg">
+		{% if error %}
+			{{ error }}
+		{% endif %}
+	</div>
+
+	<div id="register" class="divLogin">
+		<form id="form_register" name="form_register" action={{ url_for("register_user") }} method="post">
+			<label for="name" class="labels">Name:</label>
+			<input 
+				type="text"
+				name="name"
+				id="name"
+				placeholder="Put your name here"
+				required
+			/>
+
+			<label for="email" class="labels">Email:</label>
+			<input 
+				type="email"
+				name="email"
+				id="email"
+				placeholder="Put your email address"
+				required
+			/>
+
+			<label for="password" class="labels">Password:</label>
+			<input
+				type="password"
+				name="password"
+				id="password"
+				placeholder="Put your password"
+				required
+			/>
+			<input type="submit" value="Log in"/>
+		</form>
+	</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

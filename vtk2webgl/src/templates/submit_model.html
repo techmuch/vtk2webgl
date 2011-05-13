@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<div id="error_msg">
+		{% if error %}
+			{{ error }}
+		{% endif %}
+	</div>
+
+	<div id="submit_model" class="divLogin">
+		<form id="form_submit_model" name="form_submit_model" action={{ url_for("submit_model") }} method="post" enctype=multipart/form-data>
+			<label for="file" class="labels">Selecione o arquivo:</label>
+			<input type="file" name="model_file" id="model_file" required/>
+			<input type="submit" value="enviar"/>
+		</form>
+	</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
