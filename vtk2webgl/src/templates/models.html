@@ -83,7 +83,7 @@
                   size: 1
                 });
 
-                gl.drawElements(gl.LINE_STRIP, model.indices.length, gl.UNSIGNED_SHORT, model.indices);
+                gl.drawElements(gl.TRIANGLE_STRIP, model.indices.length, gl.UNSIGNED_SHORT, model.indices);
               }
 
               setInterval(tick, 1000/60);

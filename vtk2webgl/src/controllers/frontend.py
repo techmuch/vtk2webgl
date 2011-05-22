@@ -1,3 +1,4 @@
+#-*- conding:utf-8 -*-
 """
 Author: Jan Palach
 Contact: palach@gmail.com
@@ -31,7 +32,7 @@ def index():
 @frontend.route('/main', methods=['GET', 'POST'])
 def main():
     error = None
-    models = VTKModels.query.all()
+    models = VTKModels.query.filter(VTKModels.user_id == session['user_id']).all()#.first()
 
     return render_template("main.html", models=models)
 
@@ -44,7 +45,7 @@ def login():
 
         if user is not None:
             session['logged_in'] = True
-            session['user_id'] = user.user_id
+            session['user_id'] = user.id
             flash('You were logged in')
             return redirect(url_for('index'))
     return render_template('login.html', error=error)
@@ -72,42 +73,67 @@ def register_user():
 
 @frontend.route('/expose-model', methods=['GET', 'POST'])
 def expose_model():
-    reader = VTKReader()
-    dataset = reader.read(file_name, model_type)
-    dataset_geometry = jsonify(
-                        vertices = [vertice for vertice in dataset.vertices],
-                        indices = [id for id in dataset.indices]
-                   )
+    print request.form
+    if request.method == 'POST':
+        print "1..."
+        model = VTKModels.query.filter(VTKModels.id == int(request.form['model_select'])).first()
+        print "2..."
+        print model
+        reader = VTKReader()
+        print "3..."
+        reader.read(model.path, model.type)
+        print "4..."
+        dataset_geometry = jsonify(
+                            vertices = [vertice for vertice in reader.vertices],
+                            indices = [id for id in reader.indices]
+                       )
+        
+        print "5..."
+    
+        return render_template('models.html', dataset=dataset_geometry)
+    return redirect(url_for('main'))
 
-    return render_template('models.html', dataset=dataset_geometry)
 
-
-@frontend.route('/submit-model', methods=['GET', 'POST'])
-def submit_model():
+@frontend.route('/register-model', methods=['GET', 'POST'])
+def register_model():
     """
     This funtion allow a user to submit a vtk 3D model.
     """
     if request.method == 'POST' and session["logged_in"] == True:
+        print "aqui 1"
         user_id = session['user_id']
         file = request.files['model_file']
+        
+        print "Type: %s , value: %s " % (type(user_id), user_id)
+        print "Type: %s , value: %s " % (type(file), file.filename)
 
-        path = os.path.join(
-                    os.path.join(UPLOAD_FOLDER, session['user_id']),
-                    file
-                )
+        dir_path = os.path.join(UPLOAD_FOLDER, str(session['user_id']))
+        if not os.path.isdir(dir_path):
+            os.makedirs(dir_path)
+        path = os.path.join(dir_path,file.filename)
+        
+        print "aqui 2"
 
         if file and allowed_files(file.filename):
+            print "aqui 3"
             filename = secure_filename(file.filename)
+            print "aqui 4"
             file.save(path)
+            print "aqui 5"
+            
+            print request.form['model_dataset_type']
 
         model = VTKModels(
                     user_id,
-                    request.form['title'],
-                    request.form['description'],
-                    request.form['model_type'],
+                    request.form['model_title'],
+                    request.form['model_description'],
+                    request.form['model_dataset_type'],
                     path
                 )
+        print "aqui 6"
         db_session.add(model)
+        print "aqui 7"
         db_session.commit()
+        print "aqui 8"
     return redirect(url_for('main'))
 

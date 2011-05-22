@@ -67,11 +67,11 @@ class VTKModels(Base):
         self.user_id = user_id
         self.title = title
         self.description = description
-        self.model_type = model_type
+        self.type = model_type
         self.path = path
 
     def __repr__(self):
-        return '%s' % self.title
+        return 'Title: %s - Type: %s' % (self.title, self.type)
 
 Base.metadata.create_all(bind=engine)
 

@@ -16,8 +16,8 @@ class VTKReader(object):
     """
     def __init__(self):
         self.reader = None
-        self.indices = None
-        self.vertices = None
+        self.indices = []
+        self.vertices = []
         self.model_type = None
         self.file_name = None
         self.dataset = None
@@ -57,8 +57,6 @@ class VTKReader(object):
                 cell = dataset.GetCell(index)
                 for id in xrange(cell.GetNumberOfPoints()):
                     self.indices.append(cell.GetPointIds().GetId(id))
-            
-            return dataset
             
         except IOError, ex:
             print ex
