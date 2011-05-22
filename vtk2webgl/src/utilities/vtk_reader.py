@@ -24,7 +24,7 @@ class VTKReader(object):
         self.reader = None
     
     
-    def _getReader(model_type=None):
+    def getReader(self, model_type=None):
         self.model_type = model_type
         if self.model_type == 'UnstructuredGrid':
             return vtk.vtkUnstructuredGridReader()
@@ -34,25 +34,23 @@ class VTKReader(object):
             raise ValueError("model type informed is unknow...")
     
     
-    def _get_cell_points(self, dataset):
+    def get_cell_points(self, dataset):
         for index in xrange(dataset.GetNumberOfPoints()):
             coordinates = dataset.GetPoint(index)
             for coord in xrange(len(coordinates)):
                 self.vertices.append(coordinates[coord])
 
     def read(self, file_name=None, model_type=None):
-        """
-        """
         try:
             if file_name is None: raise ValueError("file name must be valid.")
             if model_type is None: raise ValueError("model type must be valid(only VTK formats).")
         
             self.file_name = file_name
-            self.reader = _getReader(model_type)
-            reader.SetFileName(filename)
-            reader.Update()
+            self.reader = self.getReader(model_type)
+            self.reader.SetFileName(file_name)
+            self.reader.Update()
 
-            dataset = reader.GetOutput()
+            dataset = self.reader.GetOutput()
             self.get_cell_points(dataset)
 
             for index in xrange(dataset.GetNumberOfCells()):

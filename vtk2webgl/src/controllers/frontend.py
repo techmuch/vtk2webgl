@@ -9,7 +9,7 @@ from werkzeug import secure_filename
 from utilities.vtk_reader import VTKReader
 
 from persistence.database import Base, db_session, engine
-from persistence.models import User, VisualModels
+from persistence.models import User, VTKModels
 
 from helper_functions import allowed_files
 
@@ -31,7 +31,7 @@ def index():
 @frontend.route('/main', methods=['GET', 'POST'])
 def main():
     error = None
-    models = VisualModels.query.all()
+    models = VTKModels.query.all()
 
     return render_template("main.html", models=models)
 
@@ -100,7 +100,7 @@ def submit_model():
             filename = secure_filename(file.filename)
             file.save(path)
 
-        model = VisualModels(
+        model = VTKModels(
                     user_id,
                     request.form['title'],
                     request.form['description'],
