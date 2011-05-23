@@ -14,22 +14,22 @@
 		        {% for model in models %}
                     <option name="model_id" value={{ model.id }} id="model_id">{{ model.title }}</option>
 				{% endfor %}
-            </select>
+            </select><br>
 			<input type="submit" value="Show model"/>
-		</form>
+		</form><br><br>
 		
 		<form id="form_submit_model" name="form_submit_model" action={{ url_for("register_model") }} method="post" enctype=multipart/form-data>
             <label for="file" class="labels">Selecione o arquivo:</label>
-            <input type="file" name="model_file" id="model_file" required/>
+            <input type="file" name="model_file" id="model_file" required/><br>
             
             <label for="model_title" class="labels">Model title:</label>
-            <input type="model_title" name="model_title" id="model_title" required/>
+            <input type="model_title" name="model_title" id="model_title" required/><br>
             
             <label for="model_description" class="labels">Model description:</label>
-            <input type="model_description" name="model_description" id="model_description" required/>
+            <input type="model_description" name="model_description" id="model_description" required/><br>
             
             <label for="model_dataset_type" class="labels">Model dataset type:</label>
-            <input type="model_dataset_type" name="model_dataset_type" id="model_dataset_type" required/>
+            <input type="model_dataset_type" name="model_dataset_type" id="model_dataset_type" required/><br><br>
             
             <input type="submit" value="enviar"/>
         </form>
