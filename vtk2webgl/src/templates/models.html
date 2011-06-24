@@ -3,21 +3,54 @@
 {% block head %}
 	<script type=text/javascript>
 	function webGLStart() {
+		//get position and id of document element...
+		var pos, $id = function(d) {
+	        return document.getElementById(d);
+	    };
+		
 	    var pyramid = new PhiloGL.O3D.Model({{ dataset.data|safe }});
-	
+	    
 	      PhiloGL('lesson01-canvas', {
 	        program: {
 	          from: 'ids',
 	          vs: 'shader-vs',
 	          fs: 'shader-fs'
 	        },
+	        
+	        events: {
+	            onDragStart: function(e) {
+	              pos = {
+	                x: e.x,
+	                y: e.y
+	              };
+	            },
+	            
+	            onDragMove: function(e) {
+	              var z = this.camera.position.z,
+	                  sign = Math.abs(z) / z;
+	              pyramid.rotation.x += -(pos.x - e.x) / 100;
+	              pyramid.rotation.y += sign * (pos.y - e.y) / 100;
+	              pyramid.rotation.z += -(pos.y - e.y) / 100;
+	              pyramid.update();
+	              pos.x = e.x;
+	              pos.y = e.y; 
+	            },
+	            
+	            onMouseWheel: function(e) {
+	              e.stop();
+	              var camera = this.camera;
+	              camera.position.z += e.wheel;
+	              camera.update();
+	            },
+	          },
+	          
 	        onError: function() {
 	          alert("An error ocurred while loading the application");
 	        },
 	        onLoad: function(app) {
 	          var gl = app.gl,
-	              canvas = app.canvas,
 	              program = app.program,
+	              canvas = app.canvas,
 	              camera = app.camera,
 	              view = new PhiloGL.Mat4,
 	              rPyramid = 0;
@@ -27,15 +60,6 @@
 	          gl.clearDepth(1);
 	          gl.enable(gl.DEPTH_TEST);
 	          gl.depthFunc(gl.LEQUAL);
-	          
-	          camera.modelView.id();
-	          camera.position = {
-	            x: 0,
-	            y: -100,
-	            z: 180
-	          };
-	          
-	          camera.update(); //update matrices
 	      
 	          function setupElement(elem) {
 	              //update element matrix
@@ -62,21 +86,26 @@
 	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	            
 	            //Draw model
-	            pyramid.position.set(-1.5, 0, -8);
-	            pyramid.rotation.set(0, rPyramid, 0);
+	            pyramid.position.set($id('translateX').value, $id('translateY').value, $id('translateZ').value);
 	            setupElement(pyramid);
+	              
 	            gl.drawArrays(gl.TRIANGLE_STRIPS, 0, pyramid.vertices.length / 3);
 	          }
 	          
-	          function animate() {
-	              rPyramid += 0.01;
+	          function animate(isAnimate) {
+	        	  if (isAnimate) {
+	                  rPyramid += 0.01;
+	                  pyramid.rotation.set(0, rPyramid, 0);
+	                  pyramid.update();
+	        	  }
 	          }
 	          
 	          function tick() {
 	              drawScene();
-	              animate();
 	          }
 	          
+	          camera.position = {x:0, y:0, z:170};
+	          camera.update();
 	          setInterval(tick, 1000/60);
 	        } 
 	      });
@@ -90,5 +119,18 @@
     <body onload="webGLStart();"> 
         <canvas id="lesson01-canvas" style="border: none;" width="1280" height="800"></canvas>
     </body>
+    
+    <br/>
+<h2>Translate object:</h2>
+
+<table style="border: 0; padding: 10px;">
+<tr>
+<td><b>Position:</b>
+<td>X: <input type="text" id="translateX" value="0.0" />
+<td>Y: <input type="text" id="translateY" value="0.0" />
+<td>Z: <input type="text" id="translateZ" value="120.0" />
+</tr>
+<tr>
+</table>
 {% endblock %}
  

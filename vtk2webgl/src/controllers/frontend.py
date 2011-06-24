@@ -79,7 +79,8 @@ def expose_model():
         
         dataset_geometry = jsonify(
                             vertices = [vertice for vertice in reader.vertices],
-                            indices = [id for id in reader.indices]
+                            indices = [id for id in reader.indices],
+                            pickable = "true"
                        )
     
         return render_template('models.html', dataset=dataset_geometry)

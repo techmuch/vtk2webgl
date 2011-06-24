@@ -1,3 +1,7 @@
+
+
+
+
 function webGLStart() {
   PhiloGL('lesson01-canvas', {
     program: {
