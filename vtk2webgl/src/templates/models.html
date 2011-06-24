@@ -1,111 +1,94 @@
 {% extends "models_base.html" %}
-
+ 
 {% block head %}
-    <script type="text/javascript">
-        function webGLStart() {
-       var model = new PhiloGL.O3D.Model({{ dataset.data|safe }});
-
-       PhiloGL('canvas01', {
-            program: {
-              from: 'ids',
-              vs: 'shader-vs',
-              fs: 'shader-fs'
-            },
-
-            onError: function() {
-              alert("An error ocurred while loading the application");
-            },
-
-            onLoad: function(app) {
-              var gl = app.gl,
-                  canvas = app.canvas,
-                  program = app.program,
-                  camera = app.camera,
-                  view = new PhiloGL.Mat4,
-                  rotateModel = 0;
-
-              gl.viewport(0, 0, canvas.width, canvas.height);
-              gl.clearColor(0, 0, 0, 1);
-              gl.clearDepth(1);
-              gl.enable(gl.DEPTH_TEST);
-              gl.depthFunc(gl.LEQUAL);
-
-              camera.modelView.id();
-              camera.position = {
-                x: 0,
-                y: -100,
-                z: 120
-              };
-
-              camera.update(); //update matrices
-
-              function setupElement(elem) {
-                //update element matrix
-                elem.update();
-                //get new view matrix out of element and camera matrices
-                view.mulMat42(camera.modelView, elem.matrix);
-                //set buffers with element data
-                program.setBuffers({
-                  'aVertexPosition': {
-                    value: elem.toFloat32Array('vertices'),
-                    size: 3
-                  },
-                  'aVertexIndex': {
-                    value: elem.toFloat32Array('indices'),
-                    size: 1
-                  }
-                });
-                //set uniforms
-                program.setUniform('uMVMatrix', view);
-                program.setUniform('uPMatrix', camera.projection);
-              }
-
-              function animate() {
-                rPyramid += 0.01;
-              }
-
-              function tick() {
-                drawScene();
-                animate();
-              }
-
-              function drawScene() {
-                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-                //Draw model
-                model.position.set(-1.5, 0, -8);
-                model.rotation.set(0, rotateModel, 0);
-                setupElement(model);
-
-                program.setBuffer('indices', {
-                  value: model.toUint16Array('indices'),
-                  bufferType: gl.ELEMENT_ARRAY_BUFFER,
-                  size: 1
-                });
-
-                gl.drawElements(gl.TRIANGLE_STRIP, model.indices.length, gl.UNSIGNED_SHORT, model.indices);
-              }
-
-              setInterval(tick, 1000/60);
-            }
-          });
-        }
-    </script>
-
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $("button").click(function(){
-                webGLStart();
-            });
-        });
+	<script type=text/javascript>
+	function webGLStart() {
+	    var pyramid = new PhiloGL.O3D.Model({{ dataset.data|safe }});
+	
+	      PhiloGL('lesson01-canvas', {
+	        program: {
+	          from: 'ids',
+	          vs: 'shader-vs',
+	          fs: 'shader-fs'
+	        },
+	        onError: function() {
+	          alert("An error ocurred while loading the application");
+	        },
+	        onLoad: function(app) {
+	          var gl = app.gl,
+	              canvas = app.canvas,
+	              program = app.program,
+	              camera = app.camera,
+	              view = new PhiloGL.Mat4,
+	              rPyramid = 0;
+	
+	          gl.viewport(0, 0, canvas.width, canvas.height);
+	          gl.clearColor(0, 0, 0, 1);
+	          gl.clearDepth(1);
+	          gl.enable(gl.DEPTH_TEST);
+	          gl.depthFunc(gl.LEQUAL);
+	          
+	          camera.modelView.id();
+	          camera.position = {
+	            x: 0,
+	            y: -100,
+	            z: 180
+	          };
+	          
+	          camera.update(); //update matrices
+	      
+	          function setupElement(elem) {
+	              //update element matrix
+	              elem.update();
+	              //get new view matrix out of element and camera matrices
+	              view.mulMat42(camera.modelView, elem.matrix);
+	              //set buffers with element data
+	              program.setBuffers({
+	                'aVertexPosition': {
+	                  value: elem.toFloat32Array('vertices'),
+	                  size: 3
+	                },
+	                'aVertexIndex': {
+	                  value: elem.toFloat32Array('indices'),
+	                  size: 1
+	                }
+	              });
+	              //set uniforms
+	              program.setUniform('uMVMatrix', view);
+	              program.setUniform('uPMatrix', camera.projection);
+	            }
+	
+	          function drawScene() {
+	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	            
+	            //Draw model
+	            pyramid.position.set(-1.5, 0, -8);
+	            pyramid.rotation.set(0, rPyramid, 0);
+	            setupElement(pyramid);
+	            gl.drawArrays(gl.TRIANGLE_STRIPS, 0, pyramid.vertices.length / 3);
+	          }
+	          
+	          function animate() {
+	              rPyramid += 0.01;
+	          }
+	          
+	          function tick() {
+	              drawScene();
+	              animate();
+	          }
+	          
+	          setInterval(tick, 1000/60);
+	        } 
+	      });
+	      
+	      
+	    }
     </script>
 {% endblock %}
-
-{% block content %}
-    <canvas id="canvas01" width="1280" height="800"></canvas>
-    <label name="teste" id="teste"></label><br/>
-    <button>show model</button>
+ 
+{% block body %}
+    <body onload="webGLStart();"> 
+        <canvas id="lesson01-canvas" style="border: none;" width="1280" height="800"></canvas>
+    </body>
 {% endblock %}
-
-{% block footer %}
-{% endblock %}
+ 

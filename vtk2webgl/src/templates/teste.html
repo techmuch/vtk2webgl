@@ -1,0 +1,128 @@
+
+<html> 
+ 
+<head> 
+<title>Learning WebGL &mdash; lesson 1</title> 
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"> 
+ 
+<link href="../lessons.css" type="text/css" rel="stylesheet" media="screen" /> 
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/PhiloGL.js') }}"></script>
+   
+  <script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}"></script> 
+ 
+<script id="shader-fs" type="x-shader/x-fragment"> 
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+ 
+  void main(void) {
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  }
+</script> 
+ 
+<script id="shader-vs" type="x-shader/x-vertex"> 
+  attribute vec3 aVertexPosition;
+ 
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+ 
+  void main(void) {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+  }
+</script>
+
+<script type=text/javascript>
+function webGLStart() {
+	var pyramid = new PhiloGL.O3D.Model({{ dataset.data|safe }});
+
+	  PhiloGL('lesson01-canvas', {
+	    program: {
+	      from: 'ids',
+	      vs: 'shader-vs',
+	      fs: 'shader-fs'
+	    },
+	    onError: function() {
+	      alert("An error ocurred while loading the application");
+	    },
+	    onLoad: function(app) {
+	      var gl = app.gl,
+	          canvas = app.canvas,
+	          program = app.program,
+	          camera = app.camera,
+	          view = new PhiloGL.Mat4,
+	          rPyramid = 0;
+
+	      gl.viewport(0, 0, canvas.width, canvas.height);
+	      gl.clearColor(0, 0, 0, 1);
+	      gl.clearDepth(1);
+	      gl.enable(gl.DEPTH_TEST);
+	      gl.depthFunc(gl.LEQUAL);
+	      
+	      camera.modelView.id();
+          camera.position = {
+            x: 0,
+            y: -100,
+            z: 120
+          };
+          
+          camera.update(); //update matrices
+	  
+          function setupElement(elem) {
+              //update element matrix
+              elem.update();
+              //get new view matrix out of element and camera matrices
+              view.mulMat42(camera.modelView, elem.matrix);
+              //set buffers with element data
+              program.setBuffers({
+                'aVertexPosition': {
+                  value: elem.toFloat32Array('vertices'),
+                  size: 3
+                },
+                'aVertexIndex': {
+                  value: elem.toFloat32Array('indices'),
+                  size: 1
+                }
+              });
+              //set uniforms
+              program.setUniform('uMVMatrix', view);
+              program.setUniform('uPMatrix', camera.projection);
+            }
+
+	      function animate() {
+	        rPyramid += 0.01;
+	      }
+
+	      function tick() {
+	        drawScene();
+	        animate();
+	      }
+
+	      function drawScene() {
+	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	        
+	        //Draw Pyramid
+	        pyramid.position.set(-1.5, 0, -8);
+	        pyramid.rotation.set(0, rPyramid, 0);
+	        setupElement(pyramid);
+	        gl.drawArrays(gl.TRIANGLE_STRIPS, 0, pyramid.vertices.length / 3);
+	        //gl.drawElements(gl.TRIANGLE_STRIPS, pyramid.indices.length, gl.UNSIGNED_SHORT, pyramid.indices);
+	      }
+	      
+	      setInterval(tick, 1000/60);
+	    } 
+	  });
+	  
+	}
+</script>
+</head> 
+
+<!-- gl.drawElements(gl.TRIANGLE_STRIPS, model.indices.length, gl.UNSIGNED_SHORT, model.indices);-->
+ 
+ 
+<body onload="webGLStart();"> 
+  <canvas id="lesson01-canvas" style="border: none;" width="1280" height="800"></canvas>
+</body> 
+ 
+</html> 
+ 

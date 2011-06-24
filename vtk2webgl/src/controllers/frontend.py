@@ -29,10 +29,9 @@ def index():
     return redirect(url_for('login'))
 
 
-@frontend.route('/main', methods=['GET', 'POST'])
+@frontend.route('/main', methods=['GET'])
 def main():
-    error = None
-    models = VTKModels.query.filter(VTKModels.user_id == session['user_id']).all()#.first()
+    models = VTKModels.query.filter(VTKModels.user_id == session['user_id']).all()
 
     return render_template("main.html", models=models)
 

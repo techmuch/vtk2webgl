@@ -2,10 +2,6 @@
 Author: Jan Palach
 Contact: palach@gmail.com
 """
-
-from abc import ABCMeta, abstractmethod
-import json
-
 import vtk
 
 
